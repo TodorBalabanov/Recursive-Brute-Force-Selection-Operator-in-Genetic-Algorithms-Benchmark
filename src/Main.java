@@ -21,7 +21,7 @@ public class Main {
 	/**
 	 * Number of generations to be created as depth of the recursion.
 	 */
-	private static final int RECURSION_DEPTH = 5;
+	private static final int RECURSION_DEPTH = 7;
 
 	/**
 	 * Size of the input vector (search space dimensions).
