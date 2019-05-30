@@ -11,7 +11,7 @@ public class Main {
 	/**
 	 * Size of the population for a single generation.
 	 */
-	private static final int POPULATION_SIZE = 11;
+	private static final int POPULATION_SIZE = 7;
 
 	/**
 	 * Mutation rate.
@@ -21,7 +21,7 @@ public class Main {
 	/**
 	 * Number of generations to be created as depth of the recursion.
 	 */
-	private static final int RECURSION_DEPTH = 7;
+	private static final int RECURSION_DEPTH = 8;
 
 	/**
 	 * Size of the input vector (search space dimensions).
@@ -147,11 +147,15 @@ public class Main {
 	}
 
 	public static void main(String[] args) {
+		long start = System.currentTimeMillis();
 		List<Double> input = solution(RECURSION_DEPTH);
+		long stop = System.currentTimeMillis();
+
 		double output = rastrigin(input);
 
 		System.out.println(output);
 		System.out.println(input);
+		System.out.println(stop - start);
 	}
 
 }
