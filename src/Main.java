@@ -66,7 +66,8 @@ public class Main {
 	 *
 	 * https://en.wikipedia.org/wiki/Griewank_function
 	 *
-	 * @param x Input vector (-600<=xi<=+600).
+	 * @param x
+	 *            Input vector (-600<=xi<=+600).
 	 * 
 	 * @return Result of the function.
 	 */
@@ -91,7 +92,8 @@ public class Main {
 	 *
 	 * https://en.wikipedia.org/wiki/Rastrigin_function
 	 *
-	 * @param x Input vector (-5.12<=xi<=+5.12).
+	 * @param x
+	 *            Input vector (-5.12<=xi<=+5.12).
 	 * 
 	 * @return Result of the function.
 	 */
@@ -110,15 +112,18 @@ public class Main {
 	/**
 	 * Uniform crossover.
 	 * 
-	 * @param first  First parent.
-	 * @param second Second parent.
+	 * @param first
+	 *            First parent.
+	 * @param second
+	 *            Second parent.
 	 * @return Child produced after crossover.
 	 */
-	private static List<Double> crossover(List<Double> first, List<Double> second) {
+	private static List<Double> crossover(List<Double> first,
+			List<Double> second) {
 		List<Double> child = new ArrayList<Double>();
 
 		for (int i = 0; i < INPUT_SIZE; i++) {
-			if (PRNG.nextDouble() < 0.5D) {
+			if (PRNG.nextBoolean()) {
 				child.add(first.get(i));
 			} else {
 				child.add(second.get(i));
@@ -131,7 +136,8 @@ public class Main {
 	/**
 	 * Mutation of the child.
 	 * 
-	 * @param child Individual to be mutated.
+	 * @param child
+	 *            Individual to be mutated.
 	 */
 	private static void mutate(List<Double> child) {
 		for (int i = 0; i < INPUT_SIZE; i++) {
@@ -144,11 +150,13 @@ public class Main {
 	}
 
 	/**
-	 * Generate solution of particular population size and with particular depth of
-	 * recursive selection.
+	 * Generate solution of particular population size and with particular depth
+	 * of recursive selection.
 	 * 
-	 * @param depth Recursion depth.
-	 * @param size  Population size size.
+	 * @param depth
+	 *            Recursion depth.
+	 * @param size
+	 *            Population size size.
 	 * @return Best found solution.
 	 */
 	private static List<Double> solution(int depth, int size) {
@@ -167,9 +175,10 @@ public class Main {
 					List<Double> child = crossover(first, second);
 					mutate(child);
 
-					/* Keep track of the best solution found. */
 					// double value = rastrigin(child);
 					double value = griewank(child);
+					
+					/* Keep track of the best solution found. */
 					if (value < optimum) {
 						result = child;
 						optimum = value;
@@ -182,7 +191,8 @@ public class Main {
 		} else if (depth == 0) {
 			/* First generation is selected randomly. */
 			for (int i = 0; i < INPUT_SIZE; i++) {
-				result.add(INPUT_MINIMUM + PRNG.nextDouble() * (INPUT_MAXIMUM - INPUT_MINIMUM));
+				result.add(INPUT_MINIMUM
+						+ PRNG.nextDouble() * (INPUT_MAXIMUM - INPUT_MINIMUM));
 			}
 		}
 
@@ -211,7 +221,8 @@ public class Main {
 				System.out.println(individuals);
 				System.out.print("Input Vector:");
 				System.out.print("\t");
-				System.out.println(input.toString().replace(',', '\t').replace("[", "").replace("]", ""));
+				System.out.println(input.toString().replace(',', '\t')
+						.replace("[", "").replace("]", ""));
 				System.out.print("Output Value:");
 				System.out.print("\t");
 				System.out.println(output);
