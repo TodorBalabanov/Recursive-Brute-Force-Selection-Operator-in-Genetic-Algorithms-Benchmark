@@ -287,7 +287,7 @@ public class Main {
 					evaluations[depth][size] = individuals;
 					values[depth][size] = output;
 
-					// System.out.print("Fuction Name:");
+					// System.out.print("Function Name:");
 					// System.out.print("\t");
 					// System.out.println(function.title());
 					// System.out.print("Recursion Depth:");
@@ -311,7 +311,7 @@ public class Main {
 					// System.out.println(stop - start);
 					// System.out.println();
 
-					System.out.print("Fuction Name:");
+					System.out.print("Function Name:");
 					System.out.print("\t");
 					System.out.println(function.title());
 					System.out.print("Time [ms]:");
