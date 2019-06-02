@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -266,6 +267,13 @@ public class Main {
 		Function functions[] = {new Rastrigin(), new Griewank()};
 
 		for (Function function : functions) {
+			long times[][] = new long[MAX_RECURSION_DEPTH
+					+ 1][MAX_POPULATION_SIZE + 1];
+			long evaluations[][] = new long[MAX_RECURSION_DEPTH
+					+ 1][MAX_POPULATION_SIZE + 1];
+			double values[][] = new double[MAX_RECURSION_DEPTH
+					+ 1][MAX_POPULATION_SIZE + 1];
+
 			for (int depth = MIN_RECURSION_DEPTH; depth <= MAX_RECURSION_DEPTH; depth++) {
 				for (int size = MIN_POPULATION_SIZE; size <= MAX_POPULATION_SIZE; size++) {
 					individuals = 0L;
@@ -275,28 +283,52 @@ public class Main {
 
 					double output = function.calculate(input);
 
+					times[depth][size] = stop - start;
+					evaluations[depth][size] = individuals;
+					values[depth][size] = output;
+
+					// System.out.print("Fuction Name:");
+					// System.out.print("\t");
+					// System.out.println(function.title());
+					// System.out.print("Recursion Depth:");
+					// System.out.print("\t");
+					// System.out.println(depth);
+					// System.out.print("Population Size:");
+					// System.out.print("\t");
+					// System.out.println(size);
+					// System.out.print("Evaluated Individuals:");
+					// System.out.print("\t");
+					// System.out.println(individuals);
+					// System.out.print("Input Vector:");
+					// System.out.print("\t");
+					// System.out.println(input.toString().replace(',', '\t')
+					// .replace("[", "").replace("]", ""));
+					// System.out.print("Output Value:");
+					// System.out.print("\t");
+					// System.out.println(output);
+					// System.out.print("Time [ms]:");
+					// System.out.print("\t");
+					// System.out.println(stop - start);
+					// System.out.println();
+
 					System.out.print("Fuction Name:");
 					System.out.print("\t");
 					System.out.println(function.title());
-					System.out.print("Recursion Depth:");
-					System.out.print("\t");
-					System.out.println(depth);
-					System.out.print("Population Size:");
-					System.out.print("\t");
-					System.out.println(size);
-					System.out.print("Evaluated Individuals:");
-					System.out.print("\t");
-					System.out.println(individuals);
-					System.out.print("Input Vector:");
-					System.out.print("\t");
-					System.out.println(input.toString().replace(',', '\t')
-							.replace("[", "").replace("]", ""));
-					System.out.print("Output Value:");
-					System.out.print("\t");
-					System.out.println(output);
 					System.out.print("Time [ms]:");
-					System.out.print("\t");
-					System.out.println(stop - start);
+					System.out.println();
+					System.out.println(Arrays.deepToString(times)
+							.replace("], [", "\n").replace("[[", "")
+							.replace("]]", "").replace(", ", "\t"));
+					System.out.print("Values:");
+					System.out.println();
+					System.out.println(Arrays.deepToString(values)
+							.replace("], [", "\n").replace("[[", "")
+							.replace("]]", "").replace(", ", "\t"));
+					System.out.print("Evaluations:");
+					System.out.println();
+					System.out.println(Arrays.deepToString(evaluations)
+							.replace("], [", "\n").replace("[[", "")
+							.replace("]]", "").replace(", ", "\t"));
 					System.out.println();
 				}
 			}
