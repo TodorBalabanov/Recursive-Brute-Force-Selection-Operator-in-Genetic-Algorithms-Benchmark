@@ -1,6 +1,4 @@
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
 /**
@@ -23,7 +21,7 @@ public class Main {
 		 *            Input vector.
 		 * @return Output value.
 		 */
-		public Double calculate(List<Double> input);
+		public double calculate(double input[]);
 
 		/**
 		 * Minimal solution space value.
@@ -56,15 +54,15 @@ public class Main {
 	 */
 	private static final class Griewank implements Function {
 		@Override
-		public Double calculate(List<Double> x) {
+		public double calculate(double x[]) {
 			double sum = 0D;
-			for (Double xi : x) {
+			for (double xi : x) {
 				sum += (xi * xi);
 			}
 
 			int i = 1;
 			double multiplication = 1D;
-			for (Double xi : x) {
+			for (double xi : x) {
 				multiplication *= Math.cos(xi / Math.sqrt(i));
 				i++;
 			}
@@ -97,12 +95,12 @@ public class Main {
 	 */
 	private static class Rastrigin implements Function {
 		@Override
-		public Double calculate(List<Double> x) {
+		public double calculate(double x[]) {
 			final double A = 10D;
-			final double n = x.size();
+			final double n = x.length;
 
 			double sum = 0D;
-			for (Double xi : x) {
+			for (double xi : x) {
 				sum += (xi * xi - A * Math.cos(2D * Math.PI * xi));
 			}
 
@@ -174,15 +172,14 @@ public class Main {
 	 *            Second parent.
 	 * @return Child produced after crossover.
 	 */
-	private static List<Double> crossover(List<Double> first,
-			List<Double> second) {
-		List<Double> child = new ArrayList<Double>();
+	private static double[] crossover(double first[], double second[]) {
+		double[] child = new double[INPUT_SIZE];
 
 		for (int i = 0; i < INPUT_SIZE; i++) {
 			if (PRNG.nextBoolean()) {
-				child.add(first.get(i));
+				child[i] = first[i];
 			} else {
-				child.add(second.get(i));
+				child[i] = second[i];
 			}
 		}
 
@@ -195,13 +192,13 @@ public class Main {
 	 * @param child
 	 *            Individual to be mutated.
 	 */
-	private static void mutate(List<Double> child) {
+	private static void mutate(double child[]) {
 		for (int i = 0; i < INPUT_SIZE; i++) {
 			if (PRNG.nextDouble() >= MUTATION_RATE) {
 				continue;
 			}
 
-			child.set(i, child.get(i) + PRNG.nextDouble() - 0.5D);
+			child[i] += PRNG.nextDouble() - 0.5D;
 		}
 	}
 
@@ -217,21 +214,20 @@ public class Main {
 	 *            Benchmark function object reference.
 	 * @return Best found solution.
 	 */
-	private static List<Double> solution(int depth, int size,
-			Function function) {
-		List<Double> result = new ArrayList<Double>();
+	private static double[] solution(int depth, int size, Function function) {
+		double[] result = null;
 
 		if (depth > 0) {
-			List<List<Double>> population = new ArrayList<List<Double>>();
+			double population[][] = new double[size][];
 			for (int j = 0; j < size; j++) {
-				population.add(solution(depth - 1, size, function));
+				population[j] = solution(depth - 1, size, function);
 			}
 
 			/* Crossover and mutation with each other. */
 			double optimum = Double.MAX_VALUE;
-			for (List<Double> first : population) {
-				for (List<Double> second : population) {
-					List<Double> child = crossover(first, second);
+			for (double first[] : population) {
+				for (double second[] : population) {
+					double child[] = crossover(first, second);
 					mutate(child);
 
 					double value = function.calculate(child);
@@ -248,9 +244,10 @@ public class Main {
 			}
 		} else if (depth == 0) {
 			/* First generation is selected randomly. */
+			result = new double[INPUT_SIZE];
 			for (int i = 0; i < INPUT_SIZE; i++) {
-				result.add(function.minimum() + PRNG.nextDouble()
-						* (function.maximum() - function.minimum()));
+				result[i] = function.minimum() + PRNG.nextDouble()
+						* (function.maximum() - function.minimum());
 			}
 		}
 
@@ -278,7 +275,7 @@ public class Main {
 				for (int size = MIN_POPULATION_SIZE; size <= MAX_POPULATION_SIZE; size++) {
 					individuals = 0L;
 					long start = System.currentTimeMillis();
-					List<Double> input = solution(depth, size, function);
+					double input[] = solution(depth, size, function);
 					long stop = System.currentTimeMillis();
 
 					double output = function.calculate(input);
