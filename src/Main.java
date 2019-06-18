@@ -124,6 +124,40 @@ public class Main {
 	}
 
 	/**
+	 * Schwefel function.
+	 *
+	 * https://www.sfu.ca/~ssurjano/schwef.html
+	 * 
+	 * @author Todor Balabanov
+	 */
+	private static final class Schwefel implements Function {
+		@Override
+		public double calculate(double[] x) {
+			double sum = 0D;
+			for (double xi : x) {
+				sum += (xi * Math.sin(Math.sqrt(Math.abs(xi))));
+			}
+
+			return 418.9829D * x.length - sum;
+		}
+
+		@Override
+		public double minimum() {
+			return -500;
+		}
+
+		@Override
+		public double maximum() {
+			return +500;
+		}
+
+		@Override
+		public String title() {
+			return "Schwefel";
+		}
+	}
+
+	/**
 	 * Pseudo-random number generator.
 	 */
 	private static final Random PRNG = new Random();
@@ -156,7 +190,7 @@ public class Main {
 	/**
 	 * Size of the input vector (search space dimensions).
 	 */
-	private static final int INPUT_SIZE = 100;
+	private static final int INPUT_SIZE = 10_000;
 
 	/**
 	 * Counting of generated individuals.
@@ -261,7 +295,7 @@ public class Main {
 	 *            Command line arguments.
 	 */
 	public static void main(String[] args) {
-		Function functions[] = {new Rastrigin(), new Griewank()};
+		Function functions[] = {new Schwefel(), new Rastrigin(), new Griewank()};
 
 		for (Function function : functions) {
 			long times[][] = new long[MAX_RECURSION_DEPTH
@@ -283,30 +317,6 @@ public class Main {
 					times[depth][size] = stop - start;
 					evaluations[depth][size] = individuals;
 					values[depth][size] = output;
-
-					// System.out.print("Function Name:");
-					// System.out.print("\t");
-					// System.out.println(function.title());
-					// System.out.print("Recursion Depth:");
-					// System.out.print("\t");
-					// System.out.println(depth);
-					// System.out.print("Population Size:");
-					// System.out.print("\t");
-					// System.out.println(size);
-					// System.out.print("Evaluated Individuals:");
-					// System.out.print("\t");
-					// System.out.println(individuals);
-					// System.out.print("Input Vector:");
-					// System.out.print("\t");
-					// System.out.println(input.toString().replace(',', '\t')
-					// .replace("[", "").replace("]", ""));
-					// System.out.print("Output Value:");
-					// System.out.print("\t");
-					// System.out.println(output);
-					// System.out.print("Time [ms]:");
-					// System.out.print("\t");
-					// System.out.println(stop - start);
-					// System.out.println();
 
 					System.out.print("Function Name:");
 					System.out.print("\t");
