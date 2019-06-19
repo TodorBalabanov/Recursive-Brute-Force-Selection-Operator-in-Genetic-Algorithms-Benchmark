@@ -158,6 +158,196 @@ public class Main {
 	}
 
 	/**
+	 * Ackley function.
+	 *
+	 * https://www.sfu.ca/~ssurjano/ackley.html
+	 * 
+	 * @author Todor Balabanov
+	 */
+	private static final class Ackley implements Function {
+		private double a = 20;
+		private double b = 0.2;
+		private double c = 2 * Math.PI;
+
+		@Override
+		public double calculate(double[] x) {
+			double sum1 = 0D;
+			double sum2 = 0D;
+			for (double xi : x) {
+				sum1 += xi * xi;
+				sum2 += Math.cos(c * xi);
+			}
+
+			return -a * Math.exp(-b * Math.sqrt(sum1 / x.length))
+					- Math.exp(sum2 / x.length) + a + Math.exp(1D);
+		}
+
+		@Override
+		public double minimum() {
+			return -32.768;
+		}
+
+		@Override
+		public double maximum() {
+			return +32.768;
+		}
+
+		@Override
+		public String title() {
+			return "Ackley";
+		}
+	}
+
+	/**
+	 * Michalewicz function.
+	 *
+	 * https://www.sfu.ca/~ssurjano/ackley.html
+	 * 
+	 * @author Todor Balabanov
+	 */
+	private static final class Michalewicz implements Function {
+		private double m = 10;
+
+		@Override
+		public double calculate(double[] x) {
+			double i = 1D;
+			double sum = 0D;
+			for (double xi : x) {
+				sum += Math.sin(xi)
+						* Math.pow(Math.sin(i * xi * xi / Math.PI), 2 * m);
+				i++;
+			}
+
+			return -sum;
+		}
+
+		@Override
+		public double minimum() {
+			return 0;
+		}
+
+		@Override
+		public double maximum() {
+			return Math.PI;
+		}
+
+		@Override
+		public String title() {
+			return "Michalewicz";
+		}
+	}
+
+	/**
+	 * Selection operator interface.
+	 * 
+	 * @author Todor Balabanov
+	 */
+	private static interface Selection {
+		/**
+		 * Best individual search function.
+		 * 
+		 * @param population
+		 *            Population with individuals.
+		 * @param function
+		 *            Objective function.
+		 * 
+		 * @return Best found individual after selection procedure.
+		 */
+		double[] best(double[][] population, Function function);
+
+		/**
+		 * Selection name.
+		 * 
+		 * @return Name.
+		 */
+		public String title();
+	}
+
+	/**
+	 * Brute-force selection between each other.
+	 * 
+	 * @author Todor Balabanov
+	 */
+	private static final class BruteForce implements Selection {
+		@Override
+		public double[] best(double[][] population, Function function) {
+			double[] result = {};
+
+			/* Crossover and mutation with each other. */
+			double optimum = Double.MAX_VALUE;
+			for (double first[] : population) {
+				for (double second[] : population) {
+					double child[] = crossover(first, second);
+					mutate(child);
+
+					double value = function.calculate(child);
+
+					/* Keep track of the best solution found. */
+					if (value < optimum) {
+						result = child;
+						optimum = value;
+					}
+
+					/* Count the number of evaluated individuals. */
+					individuals++;
+				}
+			}
+
+			return result;
+		}
+
+		@Override
+		public String title() {
+			return "Brute Force";
+		}
+	}
+
+	/**
+	 * Brute-force selection between each other.
+	 * 
+	 * @author Todor Balabanov
+	 */
+	private static final class LocalSearch implements Selection {
+		@Override
+		public double[] best(double[][] population, Function function) {
+			double[] result = {};
+
+			boolean stop = false;
+			double optimum = Double.MAX_VALUE;
+			while (stop == false) {
+				stop = true;
+
+				/* Crossover and mutation with each other. */
+				for (double first[] : population) {
+					for (double second[] : population) {
+						double child[] = crossover(first, second);
+						mutate(child);
+
+						double value = function.calculate(child);
+
+						/* Keep track of the best solution found. */
+						if (value < optimum) {
+							result = child;
+							optimum = value;
+							stop = false;
+						}
+
+						/* Count the number of evaluated individuals. */
+						individuals++;
+					}
+				}
+			}
+
+			return result;
+		}
+
+		@Override
+		public String title() {
+			return "Local Search";
+		}
+	}
+
+	/**
 	 * Pseudo-random number generator.
 	 */
 	private static final Random PRNG = new Random();
@@ -244,38 +434,23 @@ public class Main {
 	 *            Recursion depth.
 	 * @param size
 	 *            Population size size.
+	 * @param selection
+	 *            Selection operator object reference.
 	 * @param function
 	 *            Benchmark function object reference.
 	 * @return Best found solution.
 	 */
-	private static double[] solution(int depth, int size, Function function) {
+	private static double[] solution(int depth, int size, Selection selection,
+			Function function) {
 		double[] result = null;
 
 		if (depth > 0) {
 			double population[][] = new double[size][];
 			for (int j = 0; j < size; j++) {
-				population[j] = solution(depth - 1, size, function);
+				population[j] = solution(depth - 1, size, selection, function);
 			}
 
-			/* Crossover and mutation with each other. */
-			double optimum = Double.MAX_VALUE;
-			for (double first[] : population) {
-				for (double second[] : population) {
-					double child[] = crossover(first, second);
-					mutate(child);
-
-					double value = function.calculate(child);
-
-					/* Keep track of the best solution found. */
-					if (value < optimum) {
-						result = child;
-						optimum = value;
-					}
-
-					/* Count the number of evaluated individuals. */
-					individuals++;
-				}
-			}
+			result = selection.best(population, function);
 		} else if (depth == 0) {
 			/* First generation is selected randomly. */
 			result = new double[INPUT_SIZE];
@@ -295,48 +470,62 @@ public class Main {
 	 *            Command line arguments.
 	 */
 	public static void main(String[] args) {
-		Function functions[] = {new Schwefel(), new Rastrigin(), new Griewank()};
+		Selection selections[] = {new LocalSearch(), new BruteForce()};
 
-		for (Function function : functions) {
-			long times[][] = new long[MAX_RECURSION_DEPTH
-					+ 1][MAX_POPULATION_SIZE + 1];
-			long evaluations[][] = new long[MAX_RECURSION_DEPTH
-					+ 1][MAX_POPULATION_SIZE + 1];
-			double values[][] = new double[MAX_RECURSION_DEPTH
-					+ 1][MAX_POPULATION_SIZE + 1];
+		Function functions[] = {new Michalewicz(), new Ackley(), new Schwefel(),
+				new Rastrigin(), new Griewank()};
 
-			for (int depth = MIN_RECURSION_DEPTH; depth <= MAX_RECURSION_DEPTH; depth++) {
-				for (int size = MIN_POPULATION_SIZE; size <= MAX_POPULATION_SIZE; size++) {
-					individuals = 0L;
-					long start = System.currentTimeMillis();
-					double input[] = solution(depth, size, function);
-					long stop = System.currentTimeMillis();
+		for (Selection selection : selections) {
+			for (Function function : functions) {
+				long times[][] = new long[MAX_RECURSION_DEPTH
+						+ 1][MAX_POPULATION_SIZE + 1];
+				long evaluations[][] = new long[MAX_RECURSION_DEPTH
+						+ 1][MAX_POPULATION_SIZE + 1];
+				double values[][] = new double[MAX_RECURSION_DEPTH
+						+ 1][MAX_POPULATION_SIZE + 1];
 
-					double output = function.calculate(input);
+				for (int depth = MIN_RECURSION_DEPTH; depth <= MAX_RECURSION_DEPTH; depth++) {
+					for (int size = MIN_POPULATION_SIZE; size <= MAX_POPULATION_SIZE; size++) {
+						individuals = 0L;
+						long start = System.currentTimeMillis();
+						double input[] = solution(depth, size, selection,
+								function);
+						long stop = System.currentTimeMillis();
 
-					times[depth][size] = stop - start;
-					evaluations[depth][size] = individuals;
-					values[depth][size] = output;
+						double output = function.calculate(input);
 
-					System.out.print("Function Name:");
-					System.out.print("\t");
-					System.out.println(function.title());
-					System.out.print("Time [ms]:");
-					System.out.println();
-					System.out.println(Arrays.deepToString(times)
-							.replace("], [", "\n").replace("[[", "")
-							.replace("]]", "").replace(", ", "\t"));
-					System.out.print("Values:");
-					System.out.println();
-					System.out.println(Arrays.deepToString(values)
-							.replace("], [", "\n").replace("[[", "")
-							.replace("]]", "").replace(", ", "\t"));
-					System.out.print("Evaluations:");
-					System.out.println();
-					System.out.println(Arrays.deepToString(evaluations)
-							.replace("], [", "\n").replace("[[", "")
-							.replace("]]", "").replace(", ", "\t"));
-					System.out.println();
+						times[depth][size] = stop - start;
+						evaluations[depth][size] = individuals;
+						values[depth][size] = output;
+
+						System.out.print("Selection Name:");
+						System.out.print("\t");
+						System.out.println(selection.title());
+						System.out.print("Function Name:");
+						System.out.print("\t");
+						System.out.println(function.title());
+						System.out.print("Time [ms]:");
+						System.out.println();
+						System.out.println(Arrays.deepToString(times)
+								.replace("], [", "\n").replace("[[", "")
+								.replace("]]", "").replace(", ", "\t"));
+						System.out.print("Values:");
+						System.out.println();
+						System.out.println(Arrays.deepToString(values)
+								.replace("], [", "\n").replace("[[", "")
+								.replace("]]", "").replace(", ", "\t"));
+						System.out.print("Evaluations:");
+						System.out.println();
+						System.out.println(Arrays.deepToString(evaluations)
+								.replace("], [", "\n").replace("[[", "")
+								.replace("]]", "").replace(", ", "\t"));
+						System.out.print("Best Found:");
+						System.out.println();
+						System.out
+								.println(Arrays.toString(input).replace("[", "")
+										.replace("]", "").replace(", ", "\t"));
+						System.out.println();
+					}
 				}
 			}
 		}
