@@ -238,6 +238,40 @@ public class Main {
 	}
 
 	/**
+	 * Norwegian function.
+	 *
+	 * http://ssudl.solent.ac.uk/3366/1/Seminar_BAN_30_03_2016.ppt
+	 * 
+	 * @author Todor Balabanov
+	 */
+	private static final class Norwegian implements Function {
+		@Override
+		public double calculate(double[] x) {
+			double mul = 1D;
+			for (double xi : x) {
+				mul *= Math.cos(Math.PI * xi * xi * xi) * (99D + xi) / 100D;
+			}
+
+			return -mul;
+		}
+
+		@Override
+		public double minimum() {
+			return -1.1;
+		}
+
+		@Override
+		public double maximum() {
+			return +1.1;
+		}
+
+		@Override
+		public String title() {
+			return "Norwegian";
+		}
+	}
+
+	/**
 	 * Selection operator interface.
 	 * 
 	 * @author Todor Balabanov
@@ -360,7 +394,7 @@ public class Main {
 	/**
 	 * Maximum number of generations to be created as depth of the recursion.
 	 */
-	private static final int MAX_RECURSION_DEPTH = 8;
+	private static final int MAX_RECURSION_DEPTH = 7;
 
 	/**
 	 * Minimum size of the population for a single generation.
@@ -472,8 +506,8 @@ public class Main {
 	public static void main(String[] args) {
 		Selection selections[] = {new LocalSearch(), new BruteForce()};
 
-		Function functions[] = {new Michalewicz(), new Ackley(), new Schwefel(),
-				new Rastrigin(), new Griewank()};
+		Function functions[] = {new Norwegian(), new Michalewicz(),
+				new Ackley(), new Schwefel(), new Rastrigin(), new Griewank()};
 
 		for (Selection selection : selections) {
 			for (Function function : functions) {
